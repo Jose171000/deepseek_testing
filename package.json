@@ -1,0 +1,17 @@
+{
+  "name": "deepseek_testing",
+  "version": "1.0.0",
+  "description": "En este proyecto vamos a probar el uso de la API de deepseek para ordenar la data y gestionarla en un excel de retorno",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "openai": "^4.80.1"
+  }
+}
