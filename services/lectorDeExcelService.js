@@ -9,3 +9,5 @@ const lectorDeExcel = (filePath) => {
 
   return data;
 }
+
+export default lectorDeExcel;

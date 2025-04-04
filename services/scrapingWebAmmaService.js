@@ -12,14 +12,14 @@ const scrapeWebAmma = (url) => {
                 const principalesIngredientes = $("#tab-principales-ingredientes")
                     .text()
                     .trim();
+                resolve({
+                    description,
+                    modoDeUso,
+                    tipoDePiel,
+                    principalesIngredientes
+                })
             })
-            resolve({
-                description,
-                modoDeUso,
-                tipoDePiel,
-                principalesIngredientes
-            })
-            .catch((error)=>{
+            .catch((error) => {
                 console.error("Error al obtener datos de la página:", error);
                 reject(error);
             })

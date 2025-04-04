@@ -21,6 +21,4 @@ async function obtenerRespuesta(prompt){
     }
 }
 
-module.exports = {
-    obtenerRespuesta
-}
+export default obtenerRespuesta;
