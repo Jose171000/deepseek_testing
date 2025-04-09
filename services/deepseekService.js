@@ -15,7 +15,8 @@ async function obtenerRespuesta(prompt){
                 { role: "user", content: prompt }
             ]
         });
-        console.log(response.choices[0].message.content);
+        // console.log(response.choices[0].message.content);
+        return response.choices[0].message.content;
     } catch (error) {
         console.error("Error al obtener respuesta:", error);
     }
