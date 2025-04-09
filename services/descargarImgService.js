@@ -3,14 +3,9 @@ import fs from 'fs';
 import path from 'path';
 // import cambiarMedidasImg from './corregirImgService.js';
 
-const downloadImage = async (url, outputDir, sku) => {
-    let outEditedImg = "./1000x1000JPG";
-    if(!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir, { recursive: true });
-    }
-
-    if (!fs.existsSync("./noSonJPG")) {
-        fs.mkdirSync("./noSonJPG", { recursive: true });
+const downloadImage = async (url, outputDir, fileName) => {
+    if(!fs.existsSync(`${outputDir}/sonJPG`)) {
+        fs.mkdirSync(`${outputDir}/sonJPG`, { recursive: true });
     }
 
     try {
@@ -19,12 +14,14 @@ const downloadImage = async (url, outputDir, sku) => {
             responseType: 'stream',
             method: 'GET',
         })
-        const fileName = path.basename(new URL(url).pathname);
-        const ext = path.extname(fileName);
-        let filePath = path.join(outputDir, `${sku}${ext}`);
+        const nombreArchivo = path.basename(new URL(url).pathname);
+        const ext = path.extname(nombreArchivo);
+        let filePath = path.join(`${outputDir}/sonJPG`, fileName);
         if (ext !== ".jpg") {
-            filePath = path.join("./noSonJPG", `${sku}.jpg`);
-            outEditedImg = "./1000x1000NoJPG";
+            if(!fs.existsSync(`${outputDir}/noSonJPG`)) {
+                fs.mkdirSync(`${outputDir}/noSonJPG`, { recursive: true });
+            }
+            filePath = path.join(`${outputDir}/noSonJPG`, fileName);
         }
         await response.data.pipe(fs.createWriteStream(filePath));
     
@@ -37,13 +34,13 @@ const downloadImage = async (url, outputDir, sku) => {
     }
 }
 
-const prueba = (async () => {
-    const url = "https://ammabeauty.pe/wp-content/uploads/2025/04/152-001-011_regaloAbril.jpg";
-    const outputDir = "./prueba";
-    const sku = "152-001-011";
+// const prueba = (async () => {
+//     const url = "https://ammabeauty.pe/wp-content/uploads/2025/04/152-001-011_regaloAbril.jpg";
+//     const outputDir = "./prueba";
+//     const sku = "152-001-011";
 
-    await downloadImage(url, outputDir, sku);
-})();
+//     await downloadImage(url, outputDir, sku);
+// })();
 
 
 

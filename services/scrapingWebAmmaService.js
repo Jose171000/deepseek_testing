@@ -7,9 +7,9 @@ const scrapeWebAmma = (url) => {
             .then((response) => {
                 const $ = cheerio.load(response.data);
                 const description = $("#tab-description").text().trim();
-                const modoDeUso = $("#tab-modo-de-uso").text().trim();
-                const tipoDePiel = $("#tab-tipo-de-piel").text().trim();
-                const principalesIngredientes = $("#tab-principales-ingredientes")
+                const modoDeUso = $("#tab-modo-de-uso p").text().trim();
+                const tipoDePiel = $("#tab-tipo-de-piel p").text().trim();
+                const principalesIngredientes = $("#tab-principales-ingredientes p")
                     .text()
                     .trim();
                 resolve({

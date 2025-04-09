@@ -10,4 +10,6 @@ const lectorDeExcel = (filePath) => {
   return data;
 }
 
+// console.log(lectorDeExcel('./input.xlsx')[1]['Imágenes'].split(", "));
+
 export default lectorDeExcel;
