@@ -34,14 +34,6 @@ const downloadImage = async (url, outputDir, fileName) => {
     }
 }
 
-// const prueba = (async () => {
-//     const url = "https://ammabeauty.pe/wp-content/uploads/2025/04/152-001-011_regaloAbril.jpg";
-//     const outputDir = "./prueba";
-//     const sku = "152-001-011";
-
-//     await downloadImage(url, outputDir, sku);
-// })();
-
 
 
 export default downloadImage;
