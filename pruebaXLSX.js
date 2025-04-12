@@ -1,34 +1,73 @@
-const obtenerRespuestaConTimeout = (async (prompt, sku, maxRetries = 2, timeout = 5000) => {
-    let retries = 0;
-    let lastError = null;
-    while (retries <= maxRetries) {
-        
-        const timeoutPromise = new Promise((resolve, reject) => {
-            setTimeout(() => resolve({activadorDeError: true}), timeout*(retries+1));
+// import OpenAI from "openai";
+import { config } from "dotenv";
+import fetch from "node-fetch";
+import { AbortController } from "node-abort-controller";
+config();
+
+async function obtenerRespuesta(prompt, timeOut = 10000) {
+    const controller = new AbortController();
+    const timeOutId = setTimeout(() => {
+        console.log("🛑 Activando abort controller");
+        controller.abort();
+    }, timeOut);
+
+    try {
+        const fetchPromise = await fetch(process.env.OPENAI_API_BASE_URL + "/chat/completions", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: "deepseek/deepseek-chat-v3-0324:free",
+                messages: [{ role: "user", content: prompt }],
+                // temperature: 0.1,
+            }),
+            signal: controller.signal
+        })
+
+        // Creamos una promesa que se rechaza cuando se aborta
+        const abortPromise = new Promise((_, reject) => {
+            controller.signal.addEventListener('abort', () => {
+                reject(new Error(`Timeout: la solicitud excedió los ${timeOut}ms`));
+            });
         });
 
-        const pruebaPeticionAPI = new Promise((resolve, reject) => {
-           setTimeout( ()=> resolve("gané yo, el original DeepSeek"), 5000);
-        });
-        
-        const respuesta = await Promise.race([timeoutPromise, pruebaPeticionAPI]);
-        console.log(respuesta?.activadorDeError);
-        
-        if (respuesta?.activadorDeError) {
-            console.log("entré por timeoutPromise");
-            retries++;
-            
-        }else{
-            return "Hola mundo";
+        const response = await Promise.race([fetchPromise, abortPromise]);
+        clearTimeout(timeOutId);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(`Error HTTP ${response.status}: ${errorData.error?.message || 'Sin detalles'}`);
         }
-        
-        retries++;
-        
-    }
-})
 
-const prueba = async () => {
-    const resultado = await obtenerRespuestaConTimeout('Hola', '1234', 2, 3000);
-    console.log(resultado);
+        const data = await response.json();
+        return data.choices[0].message.content;
+
+    } catch (error) {
+        if (controller.signal.aborted) {
+            console.log("✋ Solicitud cancelada por timeout");
+            controller.abort();
+            return { error: 'timeout', message: error.message };
+        }
+        console.error("Error en la API:", error.message);
+        return { error: 'api_error', message: error.message };
+    } finally {
+        clearTimeout(timeOutId); // Limpieza garantizada
+        controller.abort(); // Aseguramos que el controlador se aborte
+    }
 }
-prueba();
+
+// Ejemplo de uso
+(async () => {
+    const prompt = "¿Cuál es la capital de Francia?";
+
+    // Test con timeout muy corto (1ms) para forzar el abort
+    const respuesta = await obtenerRespuesta(prompt, 100);
+    console.log(respuesta);
+
+    // Test con timeout normal (10s)
+    // const respuesta2 = await obtenerRespuesta(prompt);
+    // console.log(respuesta2);
+})();
+// export default obtenerRespuesta;
