@@ -1,36 +1,50 @@
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
-// import cambiarMedidasImg from './corregirImgService.js';
 
 const downloadImage = async (url, outputDir, fileName) => {
-    if(!fs.existsSync(`${outputDir}/sonJPG`)) {
-        fs.mkdirSync(`${outputDir}/sonJPG`, { recursive: true });
+    if(!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
     }
+    const filePath = path.join(outputDir, fileName);
+    const writer = fs.createWriteStream(filePath);
 
     try {
         const response = await axios({
             url,
             responseType: 'stream',
             method: 'GET',
+            timeout: 15000
         })
-        const nombreArchivo = path.basename(new URL(url).pathname);
-        const ext = path.extname(nombreArchivo);
-        let filePath = path.join(`${outputDir}/sonJPG`, fileName);
-        if (ext !== ".jpg") {
-            if(!fs.existsSync(`${outputDir}/noSonJPG`)) {
-                fs.mkdirSync(`${outputDir}/noSonJPG`, { recursive: true });
-            }
-            filePath = path.join(`${outputDir}/noSonJPG`, fileName);
-        }
-        await response.data.pipe(fs.createWriteStream(filePath));
-    
-        // await cambiarMedidasImg(`.\\${filePath}`, outEditedImg);
-        console.log(`✅ Imagen descargada y procesada: ${filePath}`);
+        
+        response.data.pipe(writer);
+        
+        // Esperar a que la descarga termine
+        await new Promise((resolve, reject) => {
+            writer.on('finish', () =>{
+                if(fs.statSync(filePath).size === 0){
+                    return reject(new Error("El archivo descargado está vacío (0 bytes"));
+                }
+                resolve();
+            });
 
+            writer.on('error', (err)=>{
+                reject(err);
+            })
+
+            response.data.on('error', (err)=>{
+                reject(err);
+            });
+        });
+    
 
     } catch (error) {
-        console.error(`Error descargando imagen desde ${url}:`, error.message);
+
+        writer.close();
+        if(fs.existsSync(filePath)){
+            fs.unlinkSync(filePath);
+        }
+        throw new Error(`Falló e descarga de ${fileName}: ${error.message}`);
     }
 }
 

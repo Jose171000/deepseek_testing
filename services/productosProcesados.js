@@ -1,8 +1,7 @@
 import fs from 'fs';
 
-const archivoAlmacenamiento = './productosProcesados.json';
 
-const mostrarProductosAlmacenados = () =>{
+const mostrarProductosAlmacenados = (archivoAlmacenamiento = './productosProcesados.json') =>{
     try {
         if(fs.existsSync(archivoAlmacenamiento)){
             const contenido = fs.readFileSync(archivoAlmacenamiento, 'utf-8');
@@ -15,9 +14,9 @@ const mostrarProductosAlmacenados = () =>{
     return [];
 }
 
-const guardarProductos = (productos) =>{
+const guardarProductos = (productos, archivo = './productosProcesados.json') =>{
     try {
-        fs.writeFileSync(archivoAlmacenamiento, JSON.stringify(productos, null, 2), 'utf-8');
+        fs.writeFileSync(archivo, JSON.stringify(productos, null, 2), 'utf-8');
         console.log(`\nArchivo actualizado con ${productos.length} productos`);
     } catch (error) {
         console.error('Error guardando los productos:', error);
